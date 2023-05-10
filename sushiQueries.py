@@ -38,6 +38,58 @@ def getDeliveyManByFullName(connection: MySQLConnection, targetName: str, target
 
     cursor.close()
     
+def getAll(connection: MySQLConnection, table: str):
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM { table }}")
+    
+    printAsTable(cursor)
+
+    cursor.close()
+    
+def getOne(connection: MySQLConnection, table: str, idName: str, id: int):
+    res = bool()
+    cursor = connection.cursor()
+    queryStr = f"SELECT * FROM { table } WHERE { table }.{ idName } = { id }"
+    cursor.execute(queryStr)
+    if cursor.fetchall().__len__() != 0:
+        cursor.execute(queryStr)
+        printAsTable(cursor)
+        res = 0
+    else:
+        res = -1
+
+    cursor.close()
+    return res
+
+def addOne(connection: MySQLConnection, table: str, paramNames, paramValues):
+    cursor = connection.cursor()
+    columnsStr = ""
+    for name in paramNames:
+        columnsStr += f"{ name }, "
+    valuesStr = ""
+    for value in paramValues:
+        valuesStr += f"{ value }, "
+    cursor.execute(f"INSERT INTO {table}({ columnsStr[0: -2] }) VALUES ({ valuesStr[0: -2] })")
+    connection.commit()
+    cursor.close()
+
+def updateOne(connection: MySQLConnection, table: str, idName: str, id: int, paramNames, paramValues):
+    cursor = connection.cursor()
+    paramsStr = ""
+    for name, value in zip(paramNames, paramValues):
+        paramsStr += f"{ name } = { value }, "
+    
+    queryStr = f"UPDATE { table } SET { paramsStr[0: -2] } WHERE { table }.{ idName } = { id }"
+    cursor.execute(queryStr)
+    connection.commit()
+    cursor.close()
+
+def deleteOne(connection: MySQLConnection, table: str, idName: str, id: int):
+    cursor = connection.cursor()
+    cursor.execute(f"DELETE FROM { table } WHERE { table }.{ idName } = { id }")
+    connection.commit()
+    cursor.close()  
+  
 # Получить все блюда и вывести в консоль
 def getAllDishes(connection: MySQLConnection):
     cursor = connection.cursor()
