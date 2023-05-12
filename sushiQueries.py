@@ -40,7 +40,7 @@ def getDeliveyManByFullName(connection: MySQLConnection, targetName: str, target
     
 def getAll(connection: MySQLConnection, table: str):
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM { table }}")
+    cursor.execute(f"SELECT * FROM { table }")
     
     printAsTable(cursor)
 
@@ -61,123 +61,33 @@ def getOne(connection: MySQLConnection, table: str, idName: str, id: int):
     cursor.close()
     return res
 
-def addOne(connection: MySQLConnection, table: str, paramNames, paramValues):
+def addOne(connection: MySQLConnection, table: str, params):
     cursor = connection.cursor()
     columnsStr = ""
-    for name in paramNames:
-        columnsStr += f"{ name }, "
     valuesStr = ""
-    for value in paramValues:
-        valuesStr += f"{ value }, "
-    cursor.execute(f"INSERT INTO {table}({ columnsStr[0: -2] }) VALUES ({ valuesStr[0: -2] })")
-    connection.commit()
+    for pair in params:
+        columnsStr += f"{ pair[0] }, "
+        valuesStr += f"{ pair[1] }, "
+    print(f"INSERT INTO {table}({ columnsStr[0: -2] }) VALUES ({ valuesStr[0: -2] })")
+    # cursor.execute(f"INSERT INTO {table}({ columnsStr[0: -2] }) VALUES ({ valuesStr[0: -2] })")
+    # connection.commit()
     cursor.close()
 
-def updateOne(connection: MySQLConnection, table: str, idName: str, id: int, paramNames, paramValues):
+def updateOne(connection: MySQLConnection, table: str, idName: str, id: int, params):
     cursor = connection.cursor()
     paramsStr = ""
-    for name, value in zip(paramNames, paramValues):
-        paramsStr += f"{ name } = { value }, "
+    for pair in params:
+        paramsStr += f"{ pair[0] } = { pair[1] }, "
     
     queryStr = f"UPDATE { table } SET { paramsStr[0: -2] } WHERE { table }.{ idName } = { id }"
-    cursor.execute(queryStr)
-    connection.commit()
+    print(queryStr)
+    # cursor.execute(queryStr)
+    # connection.commit()
     cursor.close()
 
 def deleteOne(connection: MySQLConnection, table: str, idName: str, id: int):
     cursor = connection.cursor()
-    cursor.execute(f"DELETE FROM { table } WHERE { table }.{ idName } = { id }")
-    connection.commit()
-    cursor.close()  
-  
-# Получить все блюда и вывести в консоль
-def getAllDishes(connection: MySQLConnection):
-    cursor = connection.cursor()
-    cursor.execute("SELECT * FROM dishes")
-    
-    printAsTable(cursor)
-
-    cursor.close()
-    
-    
-# Получить одно блюдо по id и вывести в консоль
-def getDish(connection: MySQLConnection, idDish: int):
-    res = bool()
-    cursor = connection.cursor()
-    cursor.execute(f"SELECT * FROM dishes WHERE dishes.id_dish = { idDish }")
-    if cursor.fetchall().__len__() != 0:
-        cursor.execute(f"SELECT * FROM dishes WHERE dishes.id_dish = { idDish }")
-        printAsTable(cursor)
-        res = 1
-    else:
-        res = 0
-
-    cursor.close()
-    return res
-
-# Добавить новое блюдо
-def addNewDish(connection: MySQLConnection, name: str, price: int):
-    cursor = connection.cursor()
-    cursor.execute(f"INSERT INTO dishes(name, price) VALUES (\"{ name }\", {price})")
-    connection.commit()
-    cursor.close()
-
-# Изменить существующее блюдо
-def updateDish(connection: MySQLConnection, idDish: int, newName: str, newPrice: int):
-    cursor = connection.cursor()
-    cursor.execute(f"UPDATE dishes SET name = \"{ newName }\", price = { newPrice } WHERE dishes.id_dish = { idDish }")
-    connection.commit()
-    cursor.close()
-
-# Удалить существующее блюдо
-def deleteDish(connection: MySQLConnection, idDish: int):
-    cursor = connection.cursor()
-    cursor.execute(f"DELETE FROM dishes WHERE dishes.id_dish = { idDish }")
-    connection.commit()
-    cursor.close()  
-    
-# Получить всех клиентов и вывести в консоль
-def getAllClients(connection: MySQLConnection):
-    cursor = connection.cursor()
-    cursor.execute("SELECT * FROM clients")
-    
-    printAsTable(cursor)
-
-    cursor.close()
-    
-    
-# Получить одного клиента и вывести в консоль
-def getClient(connection: MySQLConnection, idClient: int):
-    res = bool()
-    cursor = connection.cursor()
-    cursor.execute(f"SELECT * FROM clients WHERE clients.id_client = { idClient }")
-    if cursor.fetchall().__len__() != 0:
-        cursor.execute(f"SELECT * FROM clients WHERE clients.id_client = { idClient }")
-        printAsTable(cursor)
-        res = 1
-    else:
-        res = 0
-
-    cursor.close()
-    return res
-
-# Добавить нового клиента
-def addNewClient(connection: MySQLConnection, name: str, phoneNumber: str, address: str):
-    cursor = connection.cursor()
-    cursor.execute(f"INSERT INTO clients(name, phone_number, address) VALUES (\"{ name }\", \"{ phoneNumber }\", \"{ address }\")")
-    connection.commit()
-    cursor.close()
- 
-# Изменить существующего клиента
-def updateClient(connection: MySQLConnection, idClient: int, newName: str, newPhoneNumber: str, newAddress: str):
-    cursor = connection.cursor()
-    cursor.execute(f"UPDATE clients SET name = \"{ newName }\", phone_number = \"{ newPhoneNumber }\", address = \"{ newAddress }\" WHERE clients.id_client = { idClient }")
-    connection.commit()
-    cursor.close()
-
-# Удалить существующего клиента
-def deleteClient(connection: MySQLConnection, idClient: int):
-    cursor = connection.cursor()
-    cursor.execute(f"DELETE FROM clients WHERE clients.id_client = { idClient }")
-    connection.commit()
+    print(f"DELETE FROM { table } WHERE { table }.{ idName } = { id }")
+    # cursor.execute(f"DELETE FROM { table } WHERE { table }.{ idName } = { id }")
+    # connection.commit()
     cursor.close()  
