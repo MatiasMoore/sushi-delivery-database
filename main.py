@@ -18,7 +18,8 @@ def analyticsDialog(dbConnection: MySQLConnection):
     userChoice = askUser(
         "Выберите режим работы\n"
         "1 - просмотреть заказы за промежуток времени\n"
-        "2 - найти доставщиков по полному имени\n", 1, 2)
+        "2 - найти доставщиков по полному имени\n"
+        "3 - узнать общее количество заказов пользователя\n", 1, 3)
     if userChoice == -1:
         return -1
     
@@ -31,6 +32,9 @@ def analyticsDialog(dbConnection: MySQLConnection):
         name = input("Введите имя доставщика\n")
         surname = input("Введите фамилию доставщика\n")
         sq.getDeliveyManByFullName(dbConnection, name, surname)
+    elif userChoice == 3:
+        id = input("Введите id пользователя\n")
+        sq.getCLientOrderCount(dbConnection, id)
     
     return 0
 
@@ -132,7 +136,7 @@ def newOrderDialog(dbConnection: MySQLConnection, table, idName, params, existin
             break
     else:
         sq.setNullParams(dbConnection, table, idName, createdId, ["id_special_offer"])
-    sq.printAllOrdersWithDishes(dbConnection, createdId)
+    sq.printOneOrderWithDishes(dbConnection, createdId)
     print("Созданная запись")
 
 def ordersCRUD(dbConnection: MySQLConnection):
@@ -151,7 +155,17 @@ def ordersCRUD(dbConnection: MySQLConnection):
     res = 0
     
     if option == 1:
-        sq.printAllOrdersWithDishes(dbConnection)
+        limit = input("Сколько последних записей отобразить?\nenter - отобразить все\n")
+        try:
+            limit = int(limit)
+        except:
+            limit = -1
+            
+        if limit == -1: 
+            sq.printAllOrdersWithDishes(dbConnection)
+        else:
+            sq.printAllOrdersWithDishes(dbConnection, limit)
+            
     elif option == 2:
         res = newOrderDialog(dbConnection, table, idName, params) 
     elif option == 3:
@@ -160,7 +174,7 @@ def ordersCRUD(dbConnection: MySQLConnection):
         if getRes == -1:
             print("Записи с таким id не существует\n")
             return -1
-        sq.printAllOrdersWithDishes(dbConnection, id)
+        sq.printOneOrderWithDishes(dbConnection, id)
         confirm = askUser(
             "Эта запись будет изменена\n"
             "1 - изменить\n"
@@ -195,7 +209,12 @@ def genericCRUD(dbConnection: MySQLConnection, nameList, table, idName, params):
         return -1
         
     if option == 1:
-        sq.getAll(dbConnection, table)
+        limit = input("Сколько последних записей отобразить?\nenter - отобразить все\n")
+        try:
+            limit = int(limit)
+            sq.getAll(dbConnection, table, limit)
+        except:
+            sq.getAll(dbConnection, table)
     elif option == 2:
         for pair in params:
             pair[1] = input(f"Введите значения для столбца { pair[0] }\n")

@@ -47,20 +47,41 @@ def getDeliveyManByFullName(connection: MySQLConnection, targetName: str, target
 
     cursor.close()
     
-def printAllOrdersWithDishes(connection: MySQLConnection, oneId=None):
+def getCLientOrderCount(connection: MySQLConnection, clientId: int):
+    res = getOne(connection, "clients", "id_client", clientId, True)
+    if res == -1:
+        print("Пользователь с таким id не найден")
+    else:
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT GetOrderCountFromUser({ clientId })")
+        orderCount = int(cursor.fetchall()[0][0])
+        cursor.close()
+        print(f"Общее количество заказов этого пользователя = {orderCount}")
+    
+def printOneOrderWithDishes(connection: MySQLConnection, orderId: int):
     cursor = connection.cursor()
-    
-    extra = ""
-    if (oneId != None):
-        extra = f"WHERE orders.id_order = { oneId }"
-    
+        
     cursor.execute(f"SELECT orders.id_order, orders.date, orders.time, orders.sum, orders.address, special_offers.promocode, GROUP_CONCAT(dishes.name) AS dishes_list " "from orders " 
     "left join special_offers on special_offers.id_special_offer = orders.id_special_offer "
     "left join orders_to_dishes on orders_to_dishes.id_order = orders.id_order "
-    f"left join dishes on dishes.id_dish = orders_to_dishes.id_dish {extra} GROUP BY orders.id_order ORDER BY orders.id_order")
+    f"left join dishes on dishes.id_dish = orders_to_dishes.id_dish WHERE orders.id_order = { orderId } GROUP BY orders.id_order ORDER BY orders.id_order")
     
     printAsTable(cursor, [None]*6 + [80])
 
+    cursor.close()
+    
+def printAllOrdersWithDishes(connection: MySQLConnection, count=None):
+    cursor = connection.cursor()
+    
+    queryStr = "SELECT orders.id_order, orders.date, orders.time, orders.sum, orders.address, special_offers.promocode, GROUP_CONCAT(dishes.name) AS dishes_list from orders left join special_offers on special_offers.id_special_offer = orders.id_special_offer left join orders_to_dishes on orders_to_dishes.id_order = orders.id_order left join dishes on dishes.id_dish = orders_to_dishes.id_dish GROUP BY orders.id_order ORDER BY orders.id_order"
+    
+    if count == None:
+        cursor.execute(queryStr)
+    else:
+        cursor.execute(f"SELECT * FROM ({queryStr} DESC LIMIT {count})Var1 ORDER BY id_order ASC")
+
+    printAsTable(cursor, [None]*6 + [80])
+        
     cursor.close()
     
 def getLastId(connection: MySQLConnection):
@@ -70,10 +91,24 @@ def getLastId(connection: MySQLConnection):
     cursor.close()
     return id
     
-def getAll(connection: MySQLConnection, table: str):
+def getColumnNames(connection: MySQLConnection, table: str):
     cursor = connection.cursor()
-    cursor.execute(f"SELECT * FROM { table }")
+    cursor.execute(f"DESCRIBE { table }")
+    table = cursor.fetchall()
+    names = []
+    for row in table:
+        names.append(row[0])
+    cursor.close()
+    return names
     
+def getAll(connection: MySQLConnection, table: str, count=None):
+    cursor = connection.cursor()
+    if count == None:
+        cursor.execute(f"SELECT * FROM { table }") 
+    else:
+        idName = getColumnNames(connection, table)[0]
+        cursor.execute(f"SELECT * FROM (SELECT * FROM { table } ORDER BY { idName } DESC LIMIT { count })Var1 ORDER BY { idName } ASC")
+   
     printAsTable(cursor)
 
     cursor.close()
