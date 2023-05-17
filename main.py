@@ -1,5 +1,6 @@
 import sushiQueries as sq
 from sushiQueries import MySQLConnection
+
 def askUser(message: str, minPossible: int, maxPossible: int):
     choice = input(message)
     try:
@@ -151,7 +152,6 @@ def ordersCRUD(dbConnection: MySQLConnection):
     
     if option == 1:
         sq.printAllOrdersWithDishes(dbConnection)
-        # sq.getAll(dbConnection, table)
     elif option == 2:
         res = newOrderDialog(dbConnection, table, idName, params) 
     elif option == 3:
@@ -184,114 +184,6 @@ def ordersCRUD(dbConnection: MySQLConnection):
         sq.deleteOne(dbConnection, table, idName, id)
     
     return res
-
-def dishesCRUD(dbConnection: MySQLConnection):
-    option = askUser(
-        "1 - просмотреть блюда\n"
-        "2 - создать новое блюдо\n"
-        "3 - изменить блюдо\n"
-        "4 - удалить блюдо\n", 1, 4)
-    if option == -1:
-        return -1
-    
-    table = "dishes"
-    idName = "id_dish"
-    params = [ ["name", ""], ["price", ""]]
-    
-    if option == 1:
-        sq.getAll(dbConnection, table)
-    elif option == 2:
-        for pair in params:
-            pair[1] = input(f"Введите значения для столбца { pair[0] }\n")
-        sq.addOne(dbConnection, table, params)
-        sq.getOne(dbConnection, table, idName, sq.getLastId(dbConnection))
-        print("Созданная запись")
-    elif option == 3:
-        id = input("Введите id записи для редактирования\n")
-        getRes = sq.getOne(dbConnection, table, idName, id)
-        if getRes == -1:
-            print("Записи с таким id не существует\n")
-            return -1
-        confirm = askUser(
-            "Эта запись будет изменена\n"
-            "1 - изменить\n"
-            "2 - отмена\n", 1, 2)
-        if confirm == 2 or confirm == -1:
-            return -1
-        for pair in params:
-            pair[1] = input(f"Введите новое значения для столбца { pair[0] }\n")
-        sq.updateOne(dbConnection, table, idName, id, params)
-        sq.getOne(dbConnection, table, idName, id)
-        print("Созданная запись")
-    elif option == 4:
-        id = input("Введите id записи для удаления\n")
-        getRes = sq.getOne(dbConnection, table, idName, id)
-        if getRes == -1:
-            print("Записи с таким id не существует\n")
-            return -1
-        confirm = askUser(
-            "Эта запись будет удалена\n"
-            "1 - удалить\n"
-            "2 - отмена\n", 1, 2)
-        if confirm == 2 or confirm == -1:
-            return -1
-        sq.deleteOne(dbConnection, table, idName, id)
-    
-    return 0
-
-def clientsCRUD(dbConnection: MySQLConnection):
-    option = askUser(
-        "1 - просмотреть клиентов\n"
-        "2 - создать нового клиента\n"
-        "3 - изменить клиента\n"
-        "4 - удалить клиента\n", 1, 4)
-    if option == -1:
-        return -1
-    
-    table = "clients"
-    idName = "id_client"
-    params = [ ["name", ""], ["phone_number", ""], ["address", ""]]
-    
-    if option == 1:
-        sq.getAll(dbConnection, table)
-    elif option == 2:
-        for pair in params:
-            pair[1] = input(f"Введите значения для столбца { pair[0] }\n")
-        sq.addOne(dbConnection, table, params)
-        sq.getOne(dbConnection, table, idName, sq.getLastId(dbConnection))
-        print("Созданная запись")
-    elif option == 3:
-        id = input("Введите id записи для редактирования\n")
-        getRes = sq.getOne(dbConnection, table, idName, id)
-        if getRes == -1:
-            print("Записи с таким id не существует\n")
-            return -1
-        confirm = askUser(
-            "Эта запись будет изменена\n"
-            "1 - изменить\n"
-            "2 - отмена\n", 1, 2)
-        if confirm == 2 or confirm == -1:
-            return -1
-        for pair in params:
-            pair[1] = input(f"Введите новое значения для столбца { pair[0] }\n")
-        sq.updateOne(dbConnection, table, idName, id, params)
-        sq.getOne(dbConnection, table, idName, id)
-        print("Созданная запись")
-    elif option == 4:
-        id = input("Введите id записи для удаления\n")
-        getRes = sq.getOne(dbConnection, table, idName, id)
-        if getRes == -1:
-            print("Записи с таким id не существует\n")
-            return -1
-        confirm = askUser(
-            "Эта запись будет удалена\n"
-            "1 - удалить\n"
-            "2 - отмена\n", 1, 2)
-        if confirm == 2 or confirm == -1:
-            return -1
-        sq.deleteOne(dbConnection, table, idName, id)
-    
-    return 0
 
 def genericCRUD(dbConnection: MySQLConnection, nameList, table, idName, params):
     option = askUser(
