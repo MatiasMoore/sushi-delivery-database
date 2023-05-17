@@ -185,10 +185,11 @@ def ordersCRUD(dbConnection: MySQLConnection):
         res = newOrderDialog(dbConnection, table, idName, params, id)
     elif option == 4:
         id = input("Введите id записи для удаления\n")
-        getRes = sq.getOne(dbConnection, table, idName, id)
+        getRes = sq.getOne(dbConnection, table, idName, id, print=False)
         if getRes == -1:
             print("Записи с таким id не существует\n")
             return -1
+        sq.printOneOrderWithDishes(dbConnection, id)
         confirm = askUser(
             "Эта запись будет удалена\n"
             "1 - удалить\n"
@@ -196,6 +197,7 @@ def ordersCRUD(dbConnection: MySQLConnection):
         if confirm == 2 or confirm == -1:
             return -1
         sq.deleteOne(dbConnection, table, idName, id)
+        print("Запись удалена")
     
     return res
 
@@ -266,6 +268,8 @@ if __name__ == '__main__':
         
     # Основной цикл программы
     while True:
+        if not dbConnection.is_connected():
+            dbConnection.reconnect()
         menuChoice = askUser(
            "Выберите тип операций\n"
            "1 - аналитические запросы\n"
